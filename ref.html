@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Yushen Dong's Webpage</title>
+    <link href="style.css" type="text/css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+</head>
+<body>
+    <h1>Yushen Dong</h1>
+    <div id="page">
+        <div id="menu">
+            <button class="btn" onclick="location.href='aboutme.html'">
+                <svg class="icon" style="display:inline;" viewbox="0 0 10 10" height=20>
+                    <polygon points="5,1 2,10 9.5,4.5 0.5,4.5 8,10" fill="#ffa31a"/>
+                </svg> About Me</button>
+            <button class="btn" onclick="location.href='image.html'">
+                <svg class="icon" style="display:inline;" viewbox="0 0 10 7.5" height=15>
+                    <polygon points="2,0 4,0 5,1.5 6,0 8,0 10,1.5 10,3.5 5,7.5 0,3.5 0,1.5" fill="#ffa31a"/>
+                </svg> Image</button>
+            <button class="btn" onclick="location.href='ref.html'">
+                <svg class="icon" style="display:inline;" viewbox="0 0 4 6" height=20>
+                    <polygon style="stroke-linejoin:miter; stroke:#734d26;" points="0,0 4,0 4,6 0,6 0,4 2,4 0,4 0,2 2,2 0,2" fill="#ffa31a"/>
+                </svg> Reference</button>
+        </div>
+        <div id="content">
+            <h2>Interactive SVG</h2>
+                <svg class="isvg" height="200" width="600">
+                    <!--svg 1-->
+                    <ellipse id="ellipse" class="svg1" cx="100" cy="100" rx="60" ry="40" stroke="#525252" stroke-width="5" fill="#bdbdbd">
+                        <animateTransform
+                        id=test
+                        attributeName="transform"
+                        begin="0s"
+                        dur="20s"
+                        type="rotate"
+                        from="0 100 100"
+                        to="360 100 100"
+                        repeatCount="indefinite"
+                        />
+                        <animate
+                        attributeName="cx"
+                        from="100"
+                        to="80"
+                        dur="1s"
+                        begin="click"
+                        fill="freeze" />
+                    </ellipse>
+                    <text class="svg1" x="75" y="105" fill="#000000" class="control">Ellipse</text>
+                    <!--svg 2-->
+                    <rect id="rectangular" class="svg2" x="250" y="50" width="90" height="90" stroke="#a63603" stroke-width="5" fill="#fdae6b">
+                        <animateTransform
+                        attributeName="transform"
+                        begin="0s"
+                        dur="20s"
+                        type="rotate"
+                        from="0 295 95"
+                        to="360 295 95"
+                        repeatCount="indefinite"
+                        />
+                        
+                        <animateTransform
+                        attributeName="transform"
+                        dur="20s"
+                        type="rotate"
+                        from="365 295 95"
+                        to="0 295 95"
+                        begin="click"
+                        repeatCount="indefinite"
+                        />
+                    
+                    </rect>
+                    <text class="svg2" x="247" y="105" fill="#000000" class="control">Rectangular</text>
+                    <!--svg 2-->
+                    <polygon id="octagon" class="svg3" points="475,50 525,50 550,75 550,125 525,150 475,150 450,125 450,75 " stroke="#08519c" stroke-width="5" fill="#9ecae1" >
+                        <animateTransform
+                        attributeName="transform"
+                        begin="0s"
+                        dur="20s"
+                        type="rotate"
+                        from="0 500 100"
+                        to="360 500 100"
+                        repeatCount="indefinite"
+                        />
+                    </polygon>
+                    <text class="svg3" x="470" y="105" fill="#000000" class="control">Octagon</text>
+                </svg>
+                
+                <script>
+                    $(document).ready(function(){
+                        $("#octagon").click(function(){
+                            $(".svg3").hide();
+                        });
+                    });
+                </script>
+                <p>*Try to click on them!</p>
+                <br><br><br>
+            <h2>Reference</h2>
+                <p>This project was built using several Open Source components. The source code of these open source components along with license information can be found below. We acknowledge and are grateful to these developers for their contributions to the open source community.
+                <ul>
+                    <li>Project: <a href="https://jquery.com">jQuery</a></li>
+                    <li>License: <a href="https://tldrlegal.com/license/mit-license">MIT</a> and <a href="https://jquery.org/license/">jQuery License</a></li></li>
+                    <li>Website:<a href="https://www.w3schools.com">www.w3schools.com</a> and <a href="https://www.codecademy.com">www.codecademy.com</a></li>
+                </ul>
+                
+                </p>
+        </div>
+    </div>
+</body>
+</html>
