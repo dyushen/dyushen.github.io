@@ -130,7 +130,7 @@ footer{
   var centered;
 
 
-  Promise.all([d3.json("us-states-final.geojson"),d3.json('sld.json'),d3.json('cities.json')]).then(function(data) {
+  Promise.all([d3.json("us-states-final.geojson"),d3.json('sld.json'),d3.json('citypos.json')]).then(function(data) {
     //Create a path for each map feature in the data
     var geodata=data[0];
     var sld=data[1];
@@ -189,8 +189,10 @@ footer{
       .attr("y", d => projection([d.longitude, d.latitude])[1])
       .attr("width", 3)
       .attr("height", 3)
-      .attr('stroke',"black")
-      .attr("fill", "yellow")
+      .attr("fill", "#fec44f")
+      .attr('stroke',"#d95f0e")
+      .attr('stroke-width',0.5)
+      .attr('opacity',0.8)
       .attr('class', 'cityposition')
       .attr('id',d => d.city)
       .attr('name',d => d.state)
@@ -364,12 +366,15 @@ footer{
   // Zoom to feature on click
   function clicked(d,i) {
     //Add any other onClick events here
+    var m = document.getElementsByClassName('Male');
+    var f = document.getElementsByClassName('Female');
+    var u = document.getElementsByClassName('Unknown');
 
     var detailplot = document.getElementsByClassName('ageplot');
     for (var i = 0; i < detailplot.length; i ++) {
       detailplot [i].style.display = 'none';
     }
-    document.getElementById(d.properties.name).style.display = 'block';
+    document.getElementById('state'+d.properties.name).style.display = 'block';
     var city=d.properties.cityfeature;
     var allcitydot= document.getElementsByClassName('cityposition');
     var citydot = document.getElementsByName(d.properties.name);
@@ -382,6 +387,7 @@ footer{
       y = centroid[1];
       k = .8 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height);
       centered = d
+      document.getElementById('state'+d.properties.name).style.display = 'block';
       for (var i = 0; i < allcitydot.length; i ++) {
          allcitydot[i].style.display = 'none';
       }
@@ -392,11 +398,33 @@ footer{
           }
         }
       }
+      for (var i = 0; i < m.length; i ++) {
+        m[i].style.display = 'none';
+      }
+      for (var i = 0; i < f.length; i ++) {
+        f[i].style.display = 'none';
+      }
+      for (var i = 0; i < u.length; i ++) {
+        u[i].style.display = 'none';
+      }
     } else {
       x = width / 2;
       y = height / 2;
       k = 1;
       centered = null;
+      document.getElementById('state'+d.properties.name).style.display = 'none';
+      for (var i = 0; i < allcitydot.length; i ++) {
+         allcitydot[i].style.display = 'none';
+      }
+      for (var i = 0; i < m.length; i ++) {
+        m[i].style.display = 'block';
+      }
+      for (var i = 0; i < f.length; i ++) {
+        f[i].style.display = 'block';
+      }
+      for (var i = 0; i < u.length; i ++) {
+        u[i].style.display = 'block';
+      }
     }
 
     // Highlight the new feature
@@ -434,7 +462,7 @@ footer{
         .enter()
         .append("svg")
         .attr("class", "ageplot")
-        .attr("id",d => d.properties.name )
+        .attr("id",d => 'state'+d.properties.name)
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
