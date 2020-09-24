@@ -101,7 +101,9 @@ footer{
                  .cells(10)
                  .orient('horizontal')
                  .scale(color);
-
+  var colorgender = d3.scaleLinear()
+                .domain([0,1])
+                .range(["#D81B60", "#004D40"]);
   //Map projection
   var projection = d3.geoAlbersUsa()
       .scale(950)
@@ -182,16 +184,13 @@ footer{
     features.append("text").attr("x", 55).attr("y", 95).text("Female").style("font-size", "12px").attr("alignment-baseline","middle")
     features.append("text").attr("x", 105).attr("y", 95).text("Unknown").style("font-size", "12px").attr("alignment-baseline","middle")
     //
-    features.selectAll('rect')
+    features.selectAll('citycircle')
       .data(cityposition)
-      .join('rect')
-      .attr("x", d => projection([d.longitude, d.latitude])[0])
-      .attr("y", d => projection([d.longitude, d.latitude])[1])
-      .attr("width", 3)
-      .attr("height", 3)
-      .attr("fill", "#fec44f")
-      .attr('stroke',"#d95f0e")
-      .attr('stroke-width',0.5)
+      .join('circle')
+      .attr('cx', d => projection([d.longitude, d.latitude])[0])
+      .attr('cy', d => projection([d.longitude, d.latitude])[1])
+      .attr('r', d=> Math.sqrt(d.freq))
+      .attr("fill", d => colorgender(d.male/(d.male+d.female)))
       .attr('opacity',0.8)
       .attr('class', 'cityposition')
       .attr('id',d => d.city)
