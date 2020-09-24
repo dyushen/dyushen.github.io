@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="http://d3js.org/d3.v5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<style>
+body {
+  font: 12px sans-serif;
+}
+path {
+  stroke-width: 1px;
+  stroke: white;
+  cursor: pointer;
+}
+div.tooltip {
+  position: absolute;
+  text-align: center;
+  float:left;
+  padding: 2px;
+  font: 12px sans-serif;
+  background: lightgrey;
+  border: 0px;
+  border-radius: 8px;
+  opacity: 0.8;
+}
+#page {
+    margin-right: 550px;
+}
+#detail {
+    float: right;
+    width: 530px;
+    margin-right: -550px;
+
+}
+#map{
+    float: left;
+    width: 100%;
+}
+footer{
+  font-size: 20px;
+}
+#Cityinfo{
+  display: none;
+}
+.ageplot{
+  display: none;
+}
+
+</style>
+</head>
+
+<body>
+<div id='page'>
+<h1>States Gun death</h1>
+
+<label>Choose the gender you would like to show:</label>
+<select id="selectgendervalue">
+  <option value="allgender" selected="selected">All genders</option>
+  <option value="male" >Male</option>
+  <option value="female">Female</option>
+  <option value="unknown">Unknown</option>
+  <option value="none">None</option>
+</select>
+<button type="button" id='selectgender'>Submit</button>
+
+<div id='map'>
+  <script>
+  //import the color legend package
+  //Map dimensions (in pixels)
+  var width = 880,
+      height =650;
+
+  //Define all the legend
+  var color = d3.scaleLinear()
+                .domain([0,1447])
+                .range(["#deebf7", "#2171b5"]);
+  var legend = d3.legendColor()
+                 .title('Total Death Number')
+                 .labelFormat(d3.format(".0f"))
+                 .shapeWidth(30)
+                 .cells(10)
+                 .orient('horizontal')
+                 .scale(color);
+
+  //Map projection
+  var projection = d3.geoAlbersUsa()
+      .scale(950)
+      .translate([width/2,height/2]) //translate to center the map in view
+
+  //Generate paths based on projection
+  var path = d3.geoPath()
+      .projection(projection);
+
+  //Create an SVG
+  var svg = d3.select("#map").append("svg")
+      .attr("width", width)
+      .attr("height", height);
+
+  //Group for the map features
+  var features = svg.append("g")
+      .attr("class","features")
+      .call(legend)
+      .attr("transform", "translate(20, 20)");
+
+
+  //Create a tooltip, hidden at the start
+  var tooltip = d3.select("#map").append("div").attr("class","tooltip");
+
+  //Keeps track of currently zoomed feature
+  var centered;
+
+
+  Promise.all([d3.json("us-states-final.geojson"),d3.json('sld.json')]).then(function(data) {
+    //Create a path for each map feature in the data
+    var geodata=data[0];
+    var sld=data[1];
+
+    features.selectAll("path")
+      .data(geodata.features)
+      .enter()
+      .append("path")
+      .attr("d",path)
+      .attr("fill", d => color(d.properties.freq))
+      .attr("class","states")
+      .on("mouseover",showTooltip)
+      .on("mousemove",moveTooltip)
+      .on("mouseout",hideTooltip)
+      .on("click",clicked);
+
+    features.selectAll('circle')
+      .data(sld)
+      .join('circle')
+      .attr('cx', d => projection([d.lng, d.lat])[0])
+      .attr('cy', d => projection([d.lng, d.lat])[1])
+      .attr('fill', function(d){if(d.gender=='M') { return '#004D40' } else if(d.gender=='F') { return '#D81B60' } else { return '#FFC107' };})
+      .attr('r', 1.5)
+      .attr('class',function(d){if(d.gender=='M') { return 'Male' } else if(d.gender=='F') { return 'Female' } else { return 'Unknown' };})
+    //legend  for gender
+    features.append("text").attr("x", 0).attr("y", 60).text("Gender").style("font-size", "12px").attr("alignment-baseline","middle")
+    features.append("circle").attr("cx",20).attr("cy",80).attr("r", 2.5).style("fill", "#004D40")
+    features.append("circle").attr("cx",70).attr("cy",80).attr("r", 2.5).style("fill", "#D81B60")
+    features.append("circle").attr("cx", 120).attr("cy",80).attr("r", 2.5).style("fill", "#FFC107")
+    features.append("text").attr("x", 5).attr("y", 95).text("Male").style("font-size", "12px").attr("alignment-baseline","middle")
+    features.append("text").attr("x", 55).attr("y", 95).text("Female").style("font-size", "12px").attr("alignment-baseline","middle")
+    features.append("text").attr("x", 105).attr("y", 95).text("Unknown").style("font-size", "12px").attr("alignment-baseline","middle")
+
+  });
+  //click event for the map filter
+
+  $(document).ready(function() {
+    $( "#selectgender" ).click(function(){
+      if($('#selectgendervalue').val()=='allgender'){$( ".Male" ).show();$( ".Female" ).show();$( ".Unknown" ).show();}
+      else if($('#selectgendervalue').val()=='male'){$( ".Male" ).show();$( ".Female" ).hide();$( ".Unknown" ).hide();}
+      else if($('#selectgendervalue').val()=='female'){$( ".Female" ).show();$( ".Male" ).hide();$( ".Unknown" ).hide();}
+      else if($('#selectgendervalue').val()=='unknown'){$( ".Unknown" ).show();$( ".Female" ).hide();$( ".Male" ).hide();}
+      else if($('#selectgendervalue').val()=='none'){$( ".Unknown" ).hide();$( ".Female" ).hide();$( ".Male" ).hide();}
+  });});
+
+
+  //Position of the tooltip relative to the cursor
+  var tooltipOffset = {x: 5, y: -25};
+
+  //Create a tooltip, hidden at the start
+  function showTooltip(d) {
+    moveTooltip();
+    city=d.properties.cityfeature.slice(0 , Math.min(6,d.properties.cityfeature.length))
+    if(d.properties.name != "District of Columbia"){
+      tooltip.style("display","block")
+           .html('<div style="float: left" id="Stateage"></div>'+
+                 '<div style="float: right" id="Stateinfo"> State Name: ' + d.properties.name +'<br/>'+
+                 'Total Death: '+ d.properties.freq +'<br/>'+
+                 'Male: '+ d.properties.males + '&nbsp Male: '+ d.properties.females +'&nbsp Unknown: '+ d.properties.unknown + '</div>'+
+                 '<div style="float: left; text-align: left;" id="Cityinfo">'+ 'State Name: ' + d.properties.name +'<br/>'+
+                 '<br/>'+'Top city information'+'<br/>'+'<br/>'+
+                 city[0].Cityname+ ': '+city[0].Freq + ';Male: '+ city[0].Male +';Female: '+ city[0].Female +';Unknown: '+ city[0].Unknown+'</br>'+
+                 city[1].Cityname+ ': '+city[1].Freq + ';Male: '+ city[1].Male +';Female: '+ city[1].Female +';Unknown: '+ city[1].Unknown+'</br>'+
+                 city[2].Cityname+ ': '+city[2].Freq + ';Male: '+ city[2].Male +';Female: '+ city[2].Female +';Unknown: '+ city[2].Unknown+'</br>'+
+                 city[3].Cityname+ ': '+city[3].Freq + ';Male: '+ city[0].Male +';Female: '+ city[3].Female +';Unknown: '+ city[3].Unknown+'</br>'+
+                 city[4].Cityname+ ': '+city[4].Freq + ';Male: '+ city[0].Male +';Female: '+ city[4].Female +';Unknown: '+ city[4].Unknown+'</br>'+
+                 city[5].Cityname+ ': '+city[5].Freq + ';Male: '+ city[0].Male +';Female: '+ city[5].Female +';Unknown: '+ city[5].Unknown+
+                  '</div>');
+    }else{
+      tooltip.style("display","block")
+           .html('<div style="float: left" id="Stateage"></div>'+
+                 '<div style="float: right" id="Stateinfo"> State Name: ' + d.properties.name +'<br/>'+
+                 'Total Death: '+ d.properties.freq +'<br/>'+
+                 'Male: '+ d.properties.males + '&nbsp Male: '+ d.properties.females +'&nbsp Unknown: '+ d.properties.unknown + '</div>'+
+                 '<div style="float: left; text-align: left;" id="Cityinfo">'+ 'State Name: ' + d.properties.name +'<br/>'+
+                 '<br/>'+'Top city information'+'<br/>'+'<br/>'+
+                 city[0].Cityname+ ': '+city[0].Freq + ';Male: '+ city[0].Male +';Female: '+ city[0].Female +';Unknown: '+ city[0].Unknown+'</br>'+
+                 city[1].Cityname+ ': '+city[1].Freq + ';Male: '+ city[1].Male +';Female: '+ city[1].Female +';Unknown: '+ city[1].Unknown+
+                  '</div>');
+    }
+
+  //creat a box plot for age
+  // set the dimensions and margins of the graph
+  var margin = {top: 10, right: 0, bottom: 10, left: 30},
+      width = 96 - margin.left - margin.right,
+      height = 96 - margin.top - margin.bottom;
+
+    // append the svg object to the body of the page
+    var svgage = d3.select("#Stateage")
+                   .append("svg")
+                  .attr("width", 96)
+                  .attr("height", 96)
+                  .append("g")
+                  .attr("transform",
+                        "translate(" + margin.left + "," + margin.top + ")");
+
+    // create dummy data
+    var data = d.properties.age
+
+    // Compute summary statistics used for the box:
+    var data_sorted = data.sort(d3.ascending)
+    var q1 = d3.quantile(data_sorted, .25)
+    var median = d3.quantile(data_sorted, .5)
+    var q3 = d3.quantile(data_sorted, .75)
+    var interQuantileRange = q3 - q1
+    var min = q1 - 1.5 * interQuantileRange
+    var max = q1 + 1.5 * interQuantileRange
+
+    // Show the Y scale
+    var y = d3.scaleLinear()
+      .domain([-10,80])
+      .range([height, 0]);
+    svgage.call(d3.axisLeft(y))
+
+    // a few features for the box
+    var center = 30
+    var width = 30
+
+    // Show the main vertical line
+    svgage.append("line")
+      .attr("x1", center)
+      .attr("x2", center)
+      .attr("y1", y(min) )
+      .attr("y2", y(max) )
+      .attr("stroke", "black")
+
+    // Show the box
+    svgage.append("rect")
+      .attr("x", center - width/2)
+      .attr("y", y(q3) )
+      .attr("height", (y(q1)-y(q3)) )
+      .attr("width", width )
+      .attr("stroke", "black")
+      .style("fill", "#69b3a2")
+
+    // show median, min and max horizontal lines
+    svgage.selectAll("toto")
+    .data([min, median, max])
+    .enter()
+    .append("line")
+      .attr("x1", center-width/2)
+      .attr("x2", center+width/2)
+      .attr("y1", function(d){ return(y(d))} )
+      .attr("y2", function(d){ return(y(d))} )
+      .attr("stroke", "black")
+    //different view before and after click
+    var x1 = document.getElementById("Stateage");
+    var x2 = document.getElementById("Stateinfo");
+    var x3 = document.getElementById("Cityinfo");
+    if (d && centered !== d) {
+      x1.style.display = "block";
+      x2.style.display = "block";
+      x3.style.display = "none";
+    }else{
+      x1.style.display= "none";
+      x2.style.display= "none";
+      x3.style.display= "block";
+    }
+  }
+
+  //Move the tooltip to track the mouse
+  function moveTooltip() {
+    tooltip.style("top",(d3.event.pageY+tooltipOffset.y)+"px")
+        .style("left",(d3.event.pageX+tooltipOffset.x)+"px");
+  }
+
+  //Create a tooltip, hidden at the start
+  function hideTooltip() {
+    tooltip.style("display","none");
+  }
+
+
+  //function for clicked event
+  // Zoom to feature on click
+  function clicked(d,i) {
+    //Add any other onClick events here
+    var detailplot = document.getElementsByClassName('ageplot');
+    for (var i = 0; i < detailplot.length; i ++) {
+      detailplot [i].style.display = 'none';
+    }
+    document.getElementById(d.properties.name).style.display = 'block';
+
+    var x, y, k;
+    if (d && centered !== d) {
+      // Compute the new map center and scale to zoom to
+      var centroid = path.centroid(d);
+      var b = path.bounds(d);
+      x = centroid[0];
+      y = centroid[1];
+      k = .8 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height);
+      centered = d
+    } else {
+      x = width / 2;
+      y = height / 2;
+      k = 1;
+      centered = null;
+    }
+
+    // Highlight the new feature
+    features.selectAll("path")
+        .classed("highlighted",function(d) {
+            return d === centered;
+        })
+        .style("stroke-width", 1 / k + "px"); // Keep the border width constant
+    //Zoom and re-center the map
+    //Uncomment .transition() and .duration() to make zoom gradual
+    features
+        .transition()
+        .duration(500)
+        .attr("transform","translate(" + width / 2 + "," + height / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")");
+
+
+  }
+
+  </script>
+</div>
+
+<div id='detail'>
+  <h2>Detailed info</h2>
+  <div id='ageplot'>
+    <script>
+
+    var margin = {top: 10, right: 30, bottom: 50, left: 80},
+                  width = 530 - margin.left - margin.right,
+                  height = 600 - margin.top - margin.bottom;
+
+    Promise.all([d3.json("us-states-final.geojson")]).then(function(data) {
+      var geodata=data[0];
+      d3.select("#ageplot").selectAll("svg")
+        .data(geodata.features)
+        .enter()
+        .append("svg")
+        .attr("class", "ageplot")
+        .attr("id",d => d.properties.name )
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")")
+        .each(function(d) {
+          var canvas=d3.select(this);
+          var city=d.properties.cityfeature.slice(0 , Math.min(6,d.properties.cityfeature.length))
+          var flatage = []
+          city.forEach(function(city) {
+            city.Age.forEach(function(age) {
+              if(age!==null){
+              flatage.push({
+                Cityname: city.Cityname,
+                Age: age,
+              });}});});
+          var sumstat = d3.nest()
+          .key(function(d) { return d.Cityname;})
+          .rollup(function(d) {
+            q1 = d3.quantile(d.map(function(g) { return g.Age;}).sort(d3.ascending),.25)
+            median = d3.quantile(d.map(function(g) { return g.Age;}).sort(d3.ascending),.5)
+            q3 = d3.quantile(d.map(function(g) { return g.Age;}).sort(d3.ascending),.75)
+            interQuantileRange = q3 - q1
+            min = q1 - 1.5 * interQuantileRange
+            max = q3 + 1.5 * interQuantileRange
+            return({q1: q1, median: median, q3: q3, interQuantileRange: interQuantileRange, min: min, max: max})
+            })
+          .entries(flatage)
+          // Show the Y scale
+          if(d.properties.name != "District of Columbia"){
+            var yname=[city[0].Cityname, city[1].Cityname,  city[2].Cityname, city[3].Cityname,city[4].Cityname,city[5].Cityname]
+          }else{
+            var yname=[city[0].Cityname, city[1].Cityname]
+          }
+          var y = d3.scaleBand()
+                    .range([ height, 0 ])
+                    .domain(yname)
+                    .padding(.4);
+          canvas.append("g")
+          .call(d3.axisLeft(y).tickSize(0))
+          .select(".domain").remove()
+          // Show the X scale
+          var x = d3.scaleLinear()
+          .domain([-10,80])
+          .range([0, width])
+
+          canvas.append("g")
+          .attr("transform", "translate(0," + height + ")")
+          .call(d3.axisBottom(x).ticks(10))
+          .select(".domain").remove()
+
+          canvas.append("text")
+          .attr("text-anchor", "end")
+          .attr("x", width/2)
+          .attr("font-size", 20)
+          .attr("y", margin.top + 10)
+          .text("Age");
+          // Show the main vertical line
+          canvas.selectAll("vertLines")
+          .data(sumstat)
+          .enter()
+          .append("line")
+          .attr("x1", function(d){return(x(Math.max(-10,d.value.min)))})
+          .attr("x2", function(d){return(x(d.value.q1))})
+          .attr("y1", function(d){return(y(d.key) + y.bandwidth()/2)})
+          .attr("y2", function(d){return(y(d.key) + y.bandwidth()/2)})
+          .attr("stroke", "black")
+          .style("width", 40)
+
+          canvas.selectAll("vertLines")
+          .data(sumstat)
+          .enter()
+          .append("line")
+          .attr("x1", function(d){return(x(d.value.q3))})
+          .attr("x2", function(d){return(x(Math.min(80,d.value.max)))})
+          .attr("y1", function(d){return(y(d.key) + y.bandwidth()/2)})
+          .attr("y2", function(d){return(y(d.key) + y.bandwidth()/2)})
+          .attr("stroke", "black")
+          .style("width", 40)
+
+          // rectangle for the main box
+         canvas.selectAll("boxes")
+              .data(sumstat)
+              .enter()
+              .append("rect")
+              .attr("x", function(d){return(x(d.value.q1))}) // console.log(x(d.value.q1)) ;
+              .attr("width", function(d){ ; return(x(d.value.q3)-x(d.value.q1))}) //console.log(x(d.value.q3)-x(d.value.q1))
+              .attr("y", function(d) { return y(d.key); })
+              .attr("height", y.bandwidth() )
+              .attr("stroke", "black")
+              .style("fill", "#2171b5")
+              .style("opacity", 0.3)
+          // Show the median
+        canvas.selectAll("medianLines")
+              .data(sumstat)
+              .enter()
+              .append("line")
+              .attr("y1", function(d){return(y(d.key))})
+              .attr("y2", function(d){return(y(d.key) + y.bandwidth())})
+              .attr("x1", function(d){return(x(d.value.median))})
+              .attr("x2", function(d){return(x(d.value.median))})
+              .attr("stroke", "black")
+              .style("width", 80)
+        canvas.selectAll("barLines")
+              .data(sumstat)
+              .enter()
+              .append("line")
+              .attr("y1", function(d){return(y(d.key) + y.bandwidth()/4)})
+              .attr("y2", function(d){return(y(d.key) + 3*y.bandwidth()/4)})
+              .attr("x1", function(d){return(x(Math.max(-10,d.value.min)))})
+              .attr("x2", function(d){return(x(Math.max(-10,d.value.min)))})
+              .attr("stroke", "black")
+              .style("width", 80)
+        canvas.selectAll("barLines")
+              .data(sumstat)
+              .enter()
+              .append("line")
+              .attr("y1", function(d){return(y(d.key) + y.bandwidth()/4)})
+              .attr("y2", function(d){return(y(d.key) + 3*y.bandwidth()/4)})
+              .attr("x1", function(d){return(x(Math.min(80,d.value.max)))})
+              .attr("x2", function(d){return(x(Math.min(80,d.value.max)))})
+              .attr("stroke", "black")
+              .style("width", 80)
+         // Add individual points with jitte
+      var jitterWidth = 50
+         canvas.selectAll("indPoints")
+        .data(flatage)
+        .enter()
+        .append("circle")
+        .attr("cx", function(d){ return(x(d.Age))})
+        .attr("cy", function(d){ return( y(d.Cityname) + (y.bandwidth()/2) - jitterWidth/2 + Math.random()*jitterWidth )})
+        .attr("r", 4)
+        .attr("stroke", "black")
+
+      });
+    });
+    </script>
+  </div>
+</div>
+<footer>
+  <a href='about.html'>About this project</a>
+</footer>
+</div>
+</body>
+</html>
