@@ -8,6 +8,9 @@
 body {
   font: 12px sans-serif;
 }
+h1{
+  font-size: 25px;
+}
 path {
   stroke-width: 1px;
   stroke: white;
@@ -54,7 +57,7 @@ footer{
 <div id='page'>
 <h1>States Gun death</h1>
 
-<label>Choose the gender you would like to show:</label>
+<label style="font-size: 20px;">Choose the gender you would like to show:</label>
 <select id="selectgendervalue">
   <option value="allgender" selected="selected">All genders</option>
   <option value="male" >Male</option>
@@ -168,10 +171,10 @@ footer{
     if(d.properties.name != "District of Columbia"){
       tooltip.style("display","block")
            .html('<div style="float: left" id="Stateage"></div>'+
-                 '<div style="float: right" id="Stateinfo"> State Name: ' + d.properties.name +'<br/>'+
+                 '<div style="float: right; font-size: 15px; font-weight:bold" id="Stateinfo"> State Name: ' + d.properties.name +'<br/>'+
                  'Total Death: '+ d.properties.freq +'<br/>'+
                  'Male: '+ d.properties.males + '&nbsp Male: '+ d.properties.females +'&nbsp Unknown: '+ d.properties.unknown + '</div>'+
-                 '<div style="float: left; text-align: left;" id="Cityinfo">'+ 'State Name: ' + d.properties.name +'<br/>'+
+                 '<div style="float: left; text-align: left; font-size: 15px; font-weight:bold" id="Cityinfo">'+ 'State Name: ' + d.properties.name +'<br/>'+
                  '<br/>'+'Top city information'+'<br/>'+'<br/>'+
                  city[0].Cityname+ ': '+city[0].Freq + ';Male: '+ city[0].Male +';Female: '+ city[0].Female +';Unknown: '+ city[0].Unknown+'</br>'+
                  city[1].Cityname+ ': '+city[1].Freq + ';Male: '+ city[1].Male +';Female: '+ city[1].Female +';Unknown: '+ city[1].Unknown+'</br>'+
@@ -183,10 +186,10 @@ footer{
     }else{
       tooltip.style("display","block")
            .html('<div style="float: left" id="Stateage"></div>'+
-                 '<div style="float: right" id="Stateinfo"> State Name: ' + d.properties.name +'<br/>'+
+                 '<div style="float: right font-size: 15px; font-weight:bold" id="Stateinfo"> State Name: ' + d.properties.name +'<br/>'+
                  'Total Death: '+ d.properties.freq +'<br/>'+
                  'Male: '+ d.properties.males + '&nbsp Male: '+ d.properties.females +'&nbsp Unknown: '+ d.properties.unknown + '</div>'+
-                 '<div style="float: left; text-align: left;" id="Cityinfo">'+ 'State Name: ' + d.properties.name +'<br/>'+
+                 '<div style="float: left; text-align: left; font-size: 15px; font-weight:bold" id="Cityinfo">'+ 'State Name: ' + d.properties.name +'<br/>'+
                  '<br/>'+'Top city information'+'<br/>'+'<br/>'+
                  city[0].Cityname+ ': '+city[0].Freq + ';Male: '+ city[0].Male +';Female: '+ city[0].Female +';Unknown: '+ city[0].Unknown+'</br>'+
                  city[1].Cityname+ ': '+city[1].Freq + ';Male: '+ city[1].Male +';Female: '+ city[1].Female +';Unknown: '+ city[1].Unknown+
@@ -385,7 +388,9 @@ footer{
                     .domain(yname)
                     .padding(.4);
           canvas.append("g")
-          .call(d3.axisLeft(y).tickSize(0))
+          .style("font", "14px times")
+          .style('font-weight',"bold")
+          .call(d3.axisLeft(y).tickSize(2))
           .select(".domain").remove()
           // Show the X scale
           var x = d3.scaleLinear()
@@ -393,6 +398,8 @@ footer{
           .range([0, width])
 
           canvas.append("g")
+          .style("font", "14px times")
+          .style('font-weight',"bold")
           .attr("transform", "translate(0," + height + ")")
           .call(d3.axisBottom(x).ticks(10))
           .select(".domain").remove()
@@ -400,7 +407,7 @@ footer{
           canvas.append("text")
           .attr("text-anchor", "end")
           .attr("x", width/2)
-          .attr("font-size", 20)
+          .attr("font-size", 15)
           .attr("y", margin.top + 10)
           .text("Age");
           // Show the main vertical line
