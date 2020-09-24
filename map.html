@@ -134,7 +134,24 @@ footer{
     //Create a path for each map feature in the data
     var geodata=data[0];
     var sld=data[1];
-    var cityposition=data[2];
+    var cityposition1=data[2];
+
+    var cityposition=[]
+    for (var i = 0; i < geodata.features.length; i ++) {
+      geodata.features[i].properties.cityfeature.forEach(function(cityinfo) {
+        cityposition1.forEach(function(citypos) {
+          if(geodata.features[i].properties.name == citypos.state && cityinfo.Cityname == citypos.city){
+            cityposition.push({
+              state: citypos.state,
+              city: citypos.city,
+              latitude: citypos.latitude,
+              longitude: citypos.longitude,
+              freq: cityinfo.Freq,
+              male: cityinfo.Male,
+              female: cityinfo.Female,
+              unknown: cityinfo.Unknown,
+            });}});});};
+
 
     features.selectAll("path")
       .data(geodata.features)
@@ -166,14 +183,17 @@ footer{
     features.append("text").attr("x", 105).attr("y", 95).text("Unknown").style("font-size", "12px").attr("alignment-baseline","middle")
     //
     features.selectAll('rect')
-      .data(cityposition.slice(0,100))
+      .data(cityposition)
       .join('rect')
       .attr("x", d => projection([d.longitude, d.latitude])[0])
       .attr("y", d => projection([d.longitude, d.latitude])[1])
       .attr("width", 3)
       .attr("height", 3)
-      .attr("fill", "Yellow")
-      .attr('class','cityposition')
+      .attr('stroke',"black")
+      .attr("fill", "yellow")
+      .attr('class', 'cityposition')
+      .attr('id',d => d.city)
+      .attr('name',d => d.state)
       .on("mouseover",showcity)
       .on("mousemove",movecity)
       .on("mouseout",hidecity);
@@ -316,10 +336,15 @@ footer{
     tooltip.style("display","none");
   }
 
-  function showcity(d) {
+  function showcity(d,geodata) {
     moveTooltip();
+
+
     tooltipcity.style("display","block")
-      .text(d.city);
+                .html('<div style="float: left; text-align: left; font-size: 15px; font-weight:bold">'+ 'City Name: ' + d.city +'<br/>'+
+                '<br/>'+'Information'+'<br/>'+'<br/>'+
+                'Total Death'+ ': '+d.freq + ';Male: '+ d.male +';Female: '+ d.female +';Unknown: '+ d.unknown+
+                '</div>');
   }
 
   function movecity() {
@@ -339,12 +364,15 @@ footer{
   // Zoom to feature on click
   function clicked(d,i) {
     //Add any other onClick events here
+
     var detailplot = document.getElementsByClassName('ageplot');
     for (var i = 0; i < detailplot.length; i ++) {
       detailplot [i].style.display = 'none';
     }
     document.getElementById(d.properties.name).style.display = 'block';
-    var citydot = document.getElementsByClassName('cityposition');
+    var city=d.properties.cityfeature;
+    var allcitydot= document.getElementsByClassName('cityposition');
+    var citydot = document.getElementsByName(d.properties.name);
     var x, y, k;
     if (d && centered !== d) {
       // Compute the new map center and scale to zoom to
@@ -354,17 +382,21 @@ footer{
       y = centroid[1];
       k = .8 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height);
       centered = d
+      for (var i = 0; i < allcitydot.length; i ++) {
+         allcitydot[i].style.display = 'none';
+      }
       for (var i = 0; i < citydot.length; i ++) {
-        citydot[i].style.display = 'block';
+        for(var j = 0; j < city.length; j ++){
+          if(citydot[i].id == city[j].Cityname){
+            citydot[i].style.display = 'block';
+          }
+        }
       }
     } else {
       x = width / 2;
       y = height / 2;
       k = 1;
       centered = null;
-      for (var i = 0; i < citydot.length; i ++) {
-        citydot[i].style.display = 'none';
-      }
     }
 
     // Highlight the new feature
