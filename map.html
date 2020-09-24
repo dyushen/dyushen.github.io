@@ -93,6 +93,7 @@ footer{
   var color = d3.scaleLinear()
                 .domain([0,1447])
                 .range(["#deebf7", "#2171b5"]);
+
   var legend = d3.legendColor()
                  .title('Total Death Number')
                  .labelFormat(d3.format(".0f"))
@@ -118,8 +119,7 @@ footer{
   //Group for the map features
   var features = svg.append("g")
       .attr("class","features")
-      .call(legend)
-      .attr("transform", "translate(20, 20)");
+      .attr("transform", "translate(40, 30)");
 
 
   //Create a tooltip, hidden at the start
@@ -199,6 +199,8 @@ footer{
       .on("mouseover",showcity)
       .on("mousemove",movecity)
       .on("mouseout",hidecity);
+
+    features.call(legend);
   });
   //click event for the map filter
 
