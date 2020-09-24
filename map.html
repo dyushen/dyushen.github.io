@@ -28,6 +28,17 @@ div.tooltip {
   border-radius: 8px;
   opacity: 0.8;
 }
+div.tooltipcity {
+  position: absolute;
+  text-align: center;
+  float:left;
+  padding: 2px;
+  font: 12px sans-serif;
+  background: lightgrey;
+  border: 0px;
+  border-radius: 8px;
+  opacity: 0.8;
+}
 #page {
     margin-right: 550px;
 }
@@ -48,6 +59,9 @@ footer{
   display: none;
 }
 .ageplot{
+  display: none;
+}
+.cityposition{
   display: none;
 }
 
@@ -110,15 +124,17 @@ footer{
 
   //Create a tooltip, hidden at the start
   var tooltip = d3.select("#map").append("div").attr("class","tooltip");
+  var tooltipcity = d3.select("#map").append("div").attr("class","tooltipcity");
 
   //Keeps track of currently zoomed feature
   var centered;
 
 
-  Promise.all([d3.json("us-states-final.geojson"),d3.json('sld.json')]).then(function(data) {
+  Promise.all([d3.json("us-states-final.geojson"),d3.json('sld.json'),d3.json('cities.json')]).then(function(data) {
     //Create a path for each map feature in the data
     var geodata=data[0];
     var sld=data[1];
+    var cityposition=data[2];
 
     features.selectAll("path")
       .data(geodata.features)
@@ -148,7 +164,19 @@ footer{
     features.append("text").attr("x", 5).attr("y", 95).text("Male").style("font-size", "12px").attr("alignment-baseline","middle")
     features.append("text").attr("x", 55).attr("y", 95).text("Female").style("font-size", "12px").attr("alignment-baseline","middle")
     features.append("text").attr("x", 105).attr("y", 95).text("Unknown").style("font-size", "12px").attr("alignment-baseline","middle")
-
+    //
+    features.selectAll('rect')
+      .data(cityposition.slice(0,100))
+      .join('rect')
+      .attr("x", d => projection([d.longitude, d.latitude])[0])
+      .attr("y", d => projection([d.longitude, d.latitude])[1])
+      .attr("width", 3)
+      .attr("height", 3)
+      .attr("fill", "Yellow")
+      .attr('class','cityposition')
+      .on("mouseover",showcity)
+      .on("mousemove",movecity)
+      .on("mouseout",hidecity);
   });
   //click event for the map filter
 
@@ -269,6 +297,7 @@ footer{
       x1.style.display = "block";
       x2.style.display = "block";
       x3.style.display = "none";
+
     }else{
       x1.style.display= "none";
       x2.style.display= "none";
@@ -287,6 +316,24 @@ footer{
     tooltip.style("display","none");
   }
 
+  function showcity(d) {
+    moveTooltip();
+    tooltipcity.style("display","block")
+      .text(d.city);
+  }
+
+  function movecity() {
+    tooltipcity.style("top",(d3.event.pageY+tooltipOffset.y)+"px")
+        .style("left",(d3.event.pageX+tooltipOffset.x)+"px");
+  }
+
+  //Create a tooltip, hidden at the start
+  function hidecity() {
+    tooltipcity.style("display","none");
+  }
+
+
+
 
   //function for clicked event
   // Zoom to feature on click
@@ -297,7 +344,7 @@ footer{
       detailplot [i].style.display = 'none';
     }
     document.getElementById(d.properties.name).style.display = 'block';
-
+    var citydot = document.getElementsByClassName('cityposition');
     var x, y, k;
     if (d && centered !== d) {
       // Compute the new map center and scale to zoom to
@@ -307,11 +354,17 @@ footer{
       y = centroid[1];
       k = .8 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height);
       centered = d
+      for (var i = 0; i < citydot.length; i ++) {
+        citydot[i].style.display = 'block';
+      }
     } else {
       x = width / 2;
       y = height / 2;
       k = 1;
       centered = null;
+      for (var i = 0; i < citydot.length; i ++) {
+        citydot[i].style.display = 'none';
+      }
     }
 
     // Highlight the new feature
