@@ -152,6 +152,7 @@ footer{
               male: cityinfo.Male,
               female: cityinfo.Female,
               unknown: cityinfo.Unknown,
+              age:cityinfo.Age,
             });}});});};
 
 
@@ -225,22 +226,22 @@ footer{
            .html('<div style="float: left" id="Stateage"></div>'+
                  '<div style="float: right; font-size: 15px; font-weight:bold" id="Stateinfo"> State Name: ' + d.properties.name +'<br/>'+
                  'Total Death: '+ d.properties.freq +'<br/>'+
-                 'Male: '+ d.properties.males + '&nbsp Female: '+ d.properties.females +'&nbsp Unknown: '+ d.properties.unknown + '</div>'+
+                 'Male: '+ d.properties.males + '&nbsp Male: '+ d.properties.females +'&nbsp Unknown: '+ d.properties.unknown + '</div>'+
                  '<div style="float: left; text-align: left; font-size: 15px; font-weight:bold" id="Cityinfo">'+ 'State Name: ' + d.properties.name +'<br/>'+
                  '<br/>'+'Top city information'+'<br/>'+'<br/>'+
-                 city[0].Cityname+ ': '+city[0].Freq + ';Male: '+ city[0].Male +';Female: '+ city[0].Female +';Unknown: '+ city[0].Unknown+'</br>'+
-                 city[1].Cityname+ ': '+city[1].Freq + ';Male: '+ city[1].Male +';Female: '+ city[1].Female +';Unknown: '+ city[1].Unknown+'</br>'+
-                 city[2].Cityname+ ': '+city[2].Freq + ';Male: '+ city[2].Male +';Female: '+ city[2].Female +';Unknown: '+ city[2].Unknown+'</br>'+
-                 city[3].Cityname+ ': '+city[3].Freq + ';Male: '+ city[0].Male +';Female: '+ city[3].Female +';Unknown: '+ city[3].Unknown+'</br>'+
-                 city[4].Cityname+ ': '+city[4].Freq + ';Male: '+ city[0].Male +';Female: '+ city[4].Female +';Unknown: '+ city[4].Unknown+'</br>'+
-                 city[5].Cityname+ ': '+city[5].Freq + ';Male: '+ city[0].Male +';Female: '+ city[5].Female +';Unknown: '+ city[5].Unknown+
+                 city[0].Cityname+ ': '+city[0].Freq + ';  Male: '+ city[0].Male +';  Female: '+ city[0].Female +';  Unknown: '+ city[0].Unknown+'</br>'+
+                 city[1].Cityname+ ': '+city[1].Freq + ';  Male: '+ city[1].Male +';  Female: '+ city[1].Female +';  Unknown: '+ city[1].Unknown+'</br>'+
+                 city[2].Cityname+ ': '+city[2].Freq + ';  Male: '+ city[2].Male +';  Female: '+ city[2].Female +';  Unknown: '+ city[2].Unknown+'</br>'+
+                 city[3].Cityname+ ': '+city[3].Freq + ';  Male: '+ city[0].Male +';  Female: '+ city[3].Female +';  Unknown: '+ city[3].Unknown+'</br>'+
+                 city[4].Cityname+ ': '+city[4].Freq + ';  Male: '+ city[0].Male +';  Female: '+ city[4].Female +';  Unknown: '+ city[4].Unknown+'</br>'+
+                 city[5].Cityname+ ': '+city[5].Freq + ';  Male: '+ city[0].Male +';  Female: '+ city[5].Female +';  Unknown: '+ city[5].Unknown+
                   '</div>');
     }else{
       tooltip.style("display","block")
            .html('<div style="float: left" id="Stateage"></div>'+
                  '<div style="float: right font-size: 15px; font-weight:bold" id="Stateinfo"> State Name: ' + d.properties.name +'<br/>'+
                  'Total Death: '+ d.properties.freq +'<br/>'+
-                 'Male: '+ d.properties.males + '&nbsp Female: '+ d.properties.females +'&nbsp Unknown: '+ d.properties.unknown + '</div>'+
+                 'Male: '+ d.properties.males + '&nbsp Male: '+ d.properties.females +'&nbsp Unknown: '+ d.properties.unknown + '</div>'+
                  '<div style="float: left; text-align: left; font-size: 15px; font-weight:bold" id="Cityinfo">'+ 'State Name: ' + d.properties.name +'<br/>'+
                  '<br/>'+'Top city information'+'<br/>'+'<br/>'+
                  city[0].Cityname+ ': '+city[0].Freq + ';Male: '+ city[0].Male +';Female: '+ city[0].Female +';Unknown: '+ city[0].Unknown+'</br>'+
@@ -344,10 +345,73 @@ footer{
 
 
     tooltipcity.style("display","block")
-                .html('<div style="float: left; text-align: left; font-size: 15px; font-weight:bold">'+ 'City Name: ' + d.city +'<br/>'+
+                .html('<div style="float: left" id="Cityage"></div>'+
+                  '<div style="float: right; text-align: left; font-size: 15px; font-weight:bold">'+ 'City Name: ' + d.city +'<br/>'+
                 '<br/>'+'Information'+'<br/>'+'<br/>'+
-                'Total Death'+ ': '+d.freq + ';Male: '+ d.male +';Female: '+ d.female +';Unknown: '+ d.unknown+
+                'Total Death'+ ': '+d.freq + ';  Male: '+ d.male +';  Female: '+ d.female +';  Unknown: '+ d.unknown+
                 '</div>');
+    var margin = {top: 10, right: 0, bottom: 10, left: 30},
+        width = 96 - margin.left - margin.right,
+        height = 96 - margin.top - margin.bottom;
+
+        // append the svg object to the body of the page
+        var svgage = d3.select("#Cityage")
+                        .append("svg")
+                        .attr("width", 96)
+                        .attr("height", 96)
+                        .append("g")
+                        .attr("transform",
+                          "translate(" + margin.left + "," + margin.top + ")");
+
+        // create dummy data
+        var data = d.age
+
+        // Compute summary statistics used for the box:
+        var data_sorted = data.sort(d3.ascending)
+        var q1 = d3.quantile(data_sorted, .25)
+        var median = d3.quantile(data_sorted, .5)
+        var q3 = d3.quantile(data_sorted, .75)
+        var interQuantileRange = q3 - q1
+        var min = q1 - 1.5 * interQuantileRange
+        var max = q1 + 1.5 * interQuantileRange
+
+        // Show the Y scale
+        var y = d3.scaleLinear()
+                  .domain([-10,80])
+                  .range([height, 0]);
+        svgage.call(d3.axisLeft(y))
+
+        // a few features for the box
+        var center = 30
+        var width = 30
+
+        // Show the main vertical line
+        svgage.append("line")
+              .attr("x1", center)
+              .attr("x2", center)
+              .attr("y1", y(min) )
+              .attr("y2", y(max) )
+              .attr("stroke", "black")
+
+        // Show the box
+        svgage.append("rect")
+              .attr("x", center - width/2)
+              .attr("y", y(q3) )
+              .attr("height", (y(q1)-y(q3)) )
+              .attr("width", width )
+              .attr("stroke", "black")
+              .style("fill", "#69b3a2")
+
+        // show median, min and max horizontal lines
+        svgage.selectAll("toto")
+              .data([min, median, max])
+              .enter()
+              .append("line")
+              .attr("x1", center-width/2)
+              .attr("x2", center+width/2)
+              .attr("y1", function(d){ return(y(d))} )
+              .attr("y2", function(d){ return(y(d))} )
+              .attr("stroke", "black")
   }
 
   function movecity() {
