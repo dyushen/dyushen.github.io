@@ -1,4 +1,3 @@
-/* author: Andrew Burks */
 "use strict";
 /* Create a Threejs scene for the application */
 /* Get or create the application global variable */
