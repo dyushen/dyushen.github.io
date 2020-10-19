@@ -1,0 +1,85 @@
+body { margin: 0; background-color: black}
+
+#scene {
+    width: 100%;
+    height: 100%
+}
+/* SVG styling */
+svg {
+    font-family: helvetica, sans-serif;
+}
+div.tooltip {
+  position: absolute;
+  text-align: center;
+  float:left;
+  padding: 2px;
+  font: 12px sans-serif;
+  background: lightgrey;
+  border: 0px;
+  border-radius: 8px;
+  opacity: 0.8;
+}
+
+path, line {
+    stroke: #777;
+}
+.slidecontainer {
+  margin:10px;
+  margin-top:0px;
+}
+
+.slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 15px;
+  border-radius: 5px;
+  background: #e7e1ef;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+.slider:hover {
+  opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #980043;
+  cursor: pointer;
+}
+p{
+    font-size:15px;
+    color: white;
+    display:inline-block;
+}
+label{
+    font-size:13px;
+    color: white;
+    float:right;
+}
+#Brushing{
+    float:right;
+}
+h2{
+    color:white;
+}
+h3{
+    color:white;
+}
+.column {
+  float: left;
+  width: 50%;
+}
+.cutDiv {
+  margin:10px;
+  margin-left:30px;
+  margin-top:0px;
+  width: 100%;
+  height: 100%
+}
