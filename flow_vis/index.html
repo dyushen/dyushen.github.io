@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=utf-8>
+
+    <title>Assignment 3 -- three.js Robot</title>
+
+    <!-- CSS Libraries -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <!-- CSS Source -->
+    <link rel="stylesheet" href="src/css/main.css" />
+
+    <!-- JS Libraries -->
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    <script src="lib/js/three.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="https://unpkg.com/three@0.91.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script>
+
+    <!-- JS Source -->
+    <script src="src/js/scene.js"></script>
+    <script src="src/js/particleSystem.js"></script>
+    <script src="src/js/main.js"></script>
+
+
+</head>
+
+<body onload="App.start();">
+    <p style="color:white; font-size:20px; float:right;"><a href="about.html">About&nbsp;&nbsp;</a></p>
+    <h2> &nbsp; Flow Visualization</h2>
+    <div class="container-fluid">
+        <!-- 3D view -->
+      <div class="column">
+          <div class="slidecontainer">
+            <label for="Brushing">&nbsp; Brushing</label>
+            <input type="checkbox" id="Brushing" name="Brushing" value="Brushing">
+            <p>Please select a z value:  <span id="showzvalue"></span></p>
+            <input type="range" min="-5" max="5" value="0" step="0.01" class="slider" id="zvalue">
+            <p>Please select a bandwidth :  <span id="showbandwidth"></span></p>
+            <input type="range" min="0.01" max="0.1" value="0.05" step="0.005" class="slider" id="bandwidth">
+          </div>
+          <div class="particleDiv col-md-6">
+              <div id="scene"></div>
+          </div>
+      </div>
+      <!-- 2D view -->
+      <div class="column">
+          <div class="cutDiv">
+              <h3>2D cut-plane</h3>
+              <p style="color:white; font-size:10px;">&nbsp; &nbsp; 0  &nbsp;&nbsp;&nbsp; &nbsp; 40  &nbsp;&nbsp; &nbsp;&nbsp; 79 &nbsp; &nbsp; &nbsp; &nbsp;119 &nbsp;&nbsp;&nbsp; 159  &nbsp; &nbsp;&nbsp; 198  &nbsp;  &nbsp;&nbsp; 238  &nbsp;&nbsp; &nbsp; 278  &nbsp;&nbsp; &nbsp; 318  &nbsp;&nbsp; &nbsp; 357</p>
+          </div>
+      </div>
+      
+  </div>
+</body>
+</html>
